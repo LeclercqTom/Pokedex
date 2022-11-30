@@ -1,7 +1,7 @@
 <template>
   <div class="container">
-    <PokemonSearch />
-    <PokemonList v-on:ShowPokemonDetail="ShowPokemon" :imageURL="imageURL"/>
+    <PokemonSearch v-on:searchPokemonEmit="searchPokemon"/>
+    <PokemonList v-on:ShowPokemonDetail="ShowPokemon" :imageURL="imageURL" :recherche="recherche"/>
     <PokemonDetail v-if="showPokemon" v-on:HidePokemonDetail="HidePokemon" :pokemonUrl="pokemonUrl" :imageURL="imageURL" />
     
   </div>
@@ -11,7 +11,7 @@
 import PokemonDetail from "../components/PokemonDetail.vue";
 import PokemonList from "../components/PokemonList.vue";
 import PokemonSearch from "../components/PokemonSearch.vue";
-import config from "../config/config.json"
+import config from "../config/config.json";
 
 export default {
   data: ()=>{
@@ -19,10 +19,7 @@ export default {
       imageURL: config.IMG_URL,
       pokemonUrl: "",
       showPokemon: false,
-      // pokemon: [],
-      
-      
-
+      recherche: "",
     }
   },
   components: {
@@ -43,6 +40,10 @@ export default {
       this.showPokemon = false;
       this.pokemonUrl = "";
       console.log("Hide pokemon");
+    },
+
+    searchPokemon(recherche){
+      this.recherche = recherche;
     }
     
   }

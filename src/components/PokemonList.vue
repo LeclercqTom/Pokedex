@@ -1,6 +1,6 @@
 <template>
   <div class="list">
-    <article v-for="pokemon in pokemons" v-bind:key="pokemon.name" v-on:click="showPokemonDetail(pokemon.url)">
+    <article v-for="pokemon in pokemonsFiltered" v-bind:key="pokemon.name" v-on:click="showPokemonDetail(pokemon.url)">
       <img :src="imageURL + pokemon.name +'.png'" alt="">
       <h3>{{pokemon.name}}</h3>
     </article>
@@ -12,6 +12,8 @@
 // import d'axios pour faire une requete http
 import axios from '../../node_modules/axios'
 import config from '../config/config.json'
+// import _ from "lodash";
+
 export default {
   // Called right before the component is to be mounted.
   beforeMount(){
@@ -23,11 +25,11 @@ export default {
         console.log(this.pokemons);
       })
   } ,   
-  props:['imageURL'],
+  props:['imageURL',"recherche"],
   data: function () {
     return {
       // datastore
-      url : config.IMG_URL,
+  
       pokemons: []
     };
   },
@@ -37,7 +39,21 @@ export default {
       console.log(pokemon);
       this.$emit("ShowPokemonDetail",pokemon);
     }
-  } 
+  },
+  computed: {
+    pokemonsFiltered: function(){     
+      if (this.recherche === ""){
+        return this.pokemons
+      }
+      else{
+        let filteredStories = this.pokemons.filter((pokemon) => {
+        return pokemon.name.includes(this.recherche);
+       })
+       return filteredStories
+      }
+
+    }     
+  }
 }
 
 </script>

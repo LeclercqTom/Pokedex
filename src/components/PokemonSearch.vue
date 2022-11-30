@@ -1,9 +1,24 @@
 <template>
-  <div class="searchbar"></div>
+  <div class="searchbar">
+    <input type="text" placeholder="Recherche un pokemon" v-model="recherche">
+ </div>
+
 </template>
 
 <script>
-export default {};
+ 
+export default {
+  data() {
+    return {
+      recherche: "",
+    }
+  },
+  watch: {
+    recherche: function(newSearch){
+      this.$emit("searchPokemonEmit", newSearch);
+    }
+  }
+}
 </script>
 
 <style scoped>
