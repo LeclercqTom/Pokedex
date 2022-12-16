@@ -1,105 +1,124 @@
 <template>
+  <!-- Cette div contient tout le pop up -->
   <div class="detail">
-    <div class="detail-view card">
-      
-      <div class="data card-body">
-        
-        <img class="image" :src="url + pokemon.name +'.png'" alt="">
-        <h2>{{pokemon.name}}</h2>
 
+    <div class="detail-view card">
+
+      <div class="data card-body">
+        <!-- Dans le corps du pop up j'affiche :
+          - L'image qui correspond au pokemon
+          - Le nom du pokemon
+          - Les types du pokemon
+          - Ses talents
+          - Sa taille et son poids
+          - Sa lignée d'évolution
+        -->
+
+        <!-- L'image et le nom du pokemon -->
+        <img class="image" :src="url + pokemon.name + '.png'" alt="">
+        <h2>{{ pokemon.name }}</h2>
+
+        <!-- Les types -->
         <h3>Type(s)</h3>
-        <div class="types" >
+        <!-- Je créé une div qui va contenir tous les types -->
+        <div class="types"> 
+          <!-- Pour chaque type -->
           <div class="type" v-for="t in pokemon.types" :key="t.id">
-            <span :class="t.type.name">{{t.type.name}}</span>
+            <!-- je mets le nom du type comme classe pour avoir le bon css -->
+            <!-- J'affiche le nom du type -->
+            <span :class="t.type.name">{{ t.type.name }}</span>
           </div>
         </div>
 
+        <!-- Les talents -->
         <h3>Talents</h3>
         <div class="abilities">
+          <!-- Pour chaque talent -->
           <div class="ability" v-for="a in pokemon.abilities" :key="a.id">
-            {{ a.ability.name }}
-        </div>
+            <!-- J'affiche le talent correspondant au pokemon -->
+            {{ a.ability.name }} 
+          </div>
 
-        </div> 
-        <div class="property">
-          <div class="left bold">Taille</div>
-          <div class="right">{{ pokemon.height}} m</div>
         </div>
         <div class="property">
+          <!-- J'affiche la taille du pokemon -->
+          <div class="left bold">Taille</div>
+          <div class="right">{{ pokemon.height / 10 }} m</div>
+        </div>
+        <div class="property">
+          <!-- J'affiche le poids du pokemon -->
           <div class="left  bold">Poids</div>
-          <div class="right">{{ pokemon.weight}} kg</div>
+          <div class="right">{{ pokemon.weight / 10 }} kg</div>
         </div>
 
         <div id="evolution">
-          
-          <div v-if="pokemon.id % 3 === 1">
-            <img  :src="url + pokemon.name +'.png'" alt="">
-            <img  v-if="pokemon.id <= pokemons.length" :src="url + pokemons[pokemon.id].name +'.png'" alt="">
-            <img v-if="pokemon.id+1 <= pokemons.length" :src="url + pokemons[pokemon.id+1].name +'.png'" alt="">
-           
-            
-          </div>
-          
-          <div v-if="pokemon.id % 3 === 2">
-            <img v-if="pokemon.id-2 <= pokemons.length" :src="url + pokemons[pokemon.id-2].name +'.png'" alt="">
-            <img  :src="url + pokemon.name +'.png'" alt="">
-            <img v-if="pokemon.id <= pokemons.length" :src="url + pokemons[pokemon.id].name +'.png'" alt="">
-          </div>
+          <div>
+            <!-- J'affiche l'image correspondant au pokemon de base-->
+            <img :src="url + pokemonEvo.chain.species.name + '.png'" alt="">
 
-          <div v-if="pokemon.id % 3 === 0">
-            <img  :src="url + pokemons[pokemon.id-3].name +'.png'" alt="">
-            <img  :src="url + pokemons[pokemon.id-2].name +'.png'" alt="">
-            <img  :src="url + pokemon.name +'.png'" alt="">
-          </div>
+            <!-- Si le pokemon possède un évolution j'affiche l'image de celle-ci -->
+            <img v-if="pokemonEvo.chain.evolves_to.length > 0" :src="url + pokemonEvo.chain.evolves_to[0].species.name + '.png'" alt="" >
 
+            <!-- Si le pokemon possède une deuxième évolution j'affiche également l'image de celle-ci -->
+            <img v-if="pokemonEvo.chain.evolves_to[0].evolves_to.length > 0" :src="url + pokemonEvo.chain.evolves_to[0].evolves_to[0].species.name + '.png'" alt="">
+          </div>
         </div>
-       
       </div>
+      <!-- bouton permettant de fermer le pop up -->
       <button class="close" v-on:click="closeDetail()">Fermer</button>
     </div>
   </div>
 </template>
 
-<script>  
-// import { config } from 'process';
+<script>
 import axios from '../../node_modules/axios'
 import config from '../config/config.json'
 
 export default {
-  
-  props: ['pokemonUrl',"imageURL",],
-  data:() =>{
+  // Les props permettent de transférer les données pokemonUrl et imageURL dans ce composant
+  props: ['pokemonUrl', "imageURL",],
+  data () {
     return {
-      pokemon: [],
-      pokemons: [],
-      show: false,
-      url: config.IMG_URL,
+      pokemon: [], // récupére les infos d'un pokemon
+      pokemonInfo: [], // récupère des informations complémentaires sur le pokemon
+      pokemonEvo: [], // récupère des informations sur la lignée d'évolution
+      show: false, 
+      url: config.IMG_URL, // récupère le lien du JSON
+
     };
   },
-  beforeMount(){
-    // appel de l'api pour récuperer la liste des characters
+  // appelé juste avant que le composant soit créé
+  beforeMount() {
+    // appel pour récuperer les infos d'un pokemon
     axios.get(this.pokemonUrl)
-      .then((e)=>{
-        // sur le retour on stock la data dans caracters
+      .then((e) => {
+        // je stocke ces infos dans la variable pokemon
         this.pokemon = e.data;
-        this.show = true;
-        console.log(this.show);
-        console.log(this.pokemon);
-      }),
-      // appel de l'api pour récuperer la liste des characters
-      axios.get(config.API_URL)
-      .then((e)=>{
-        // sur le retour on stock la data dans caracters
-        this.pokemons = e.data.results; 
+        // si je récupère ces infos cela veut dire que j'ai ouvet le pop up donc je passe à true
+        this.show = true; 
+
+        // appel pour récuperer des infos supplémentaires sur le pokemon
+        axios.get("https://pokeapi.co/api/v2/pokemon-species/" + this.pokemon.name)
+          .then((e) => {
+            // je stock ces infos dans la variable pokemonInfo
+            this.pokemonInfo = e.data;
+
+            // appel pour récuperer des infos sur la lignée d'évolution 
+            axios.get(this.pokemonInfo.evolution_chain.url)
+              .then((e) => {
+                // je stocke ces infos dans la varaible pokemonEvo
+                this.pokemonEvo = e.data;
+              })
+          })
       })
   },
-  
+
   methods: {
-    closeDetail: function(pokemon) {
-        console.log('Fermeture');
-        this.show = false;
-        this.$emit('HidePokemonDetail',pokemon);
-      },
+    // Cette méthode envoie un signal quand je clique sur le bouton fermer
+    closeDetail: function (pokemon) {
+      this.show = false; // je passe show à false
+      this.$emit('HidePokemonDetail', pokemon); // La fonction s'appelle HidePokemonDetail et je récupère le pokemon
+    },
   }
 };
 
@@ -110,54 +129,71 @@ export default {
   .grass {
     background: rgb(3, 139, 44) !important;
   }
+
   .poison {
     background: rgb(74, 7, 105) !important;
   }
+
   .water {
     background: rgb(8, 135, 219) !important;
   }
+
   .dragon {
     background: rgb(27, 2, 68) !important;
   }
+
   .ice {
     background: rgb(78, 199, 255) !important;
   }
+
   .flying {
     background: rgb(145, 215, 255) !important;
   }
+
   .fire {
     background: rgb(238, 135, 17) !important;
   }
+
   .ghost {
     background: rgb(74, 52, 87) !important;
   }
+
   .fighting {
     background: rgb(122, 0, 0) !important;
   }
+
   .normal {
     background: rgb(104, 104, 104) !important;
   }
+
   .psychic {
     background: rgb(195, 0, 255) !important;
   }
+
   .bug {
     background: rgb(52, 87, 6) !important;
   }
+
   .dark {
     background: rgb(43, 43, 43) !important;
   }
+
   .steel {
     background: rgb(116, 116, 116) !important;
   }
+
   .fairy {
     background: rgb(248, 165, 237) !important;
   }
+
   .eletric {
     background: rgb(255, 217, 1) !important;
   }
+
   .rock {
     background: rgb(88, 95, 100) !important;
   }
+
   .ground {
     background: rgb(92, 70, 70) !important;
   }
@@ -177,6 +213,7 @@ export default {
   height: 100vh;
   background: rgba(10, 7, 0, 0.562);
 }
+
 .detail-view {
   display: flex;
   justify-content: center;
@@ -192,6 +229,7 @@ export default {
   border-radius: 5px;
   box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2), 0 10px 10px rgba(0, 0, 0, 0.2);
 }
+
 .image {
   display: flex;
   justify-content: center;
@@ -218,18 +256,22 @@ h2 {
   width: 100%;
   margin-bottom: 40px;
 }
+
 .property {
   width: 90%;
   max-width: 400px;
   border-bottom: 1px solid #ccc;
   margin-bottom: 10px;
 }
+
 .left {
   float: left;
 }
+
 .right {
   float: right;
 }
+
 h3 {
   width: 90%;
   max-width: 400px;
@@ -244,6 +286,7 @@ h3 {
   width: 90%;
   max-width: 400px;
 }
+
 .type {
   // color: rgb(17, 67, 182);
   margin: 0 0 10px 0;
@@ -252,12 +295,14 @@ h3 {
   font-size: 1rem;
   letter-spacing: 2px;
   text-transform: capitalize;
+
   span {
     color: #ffffff !important;
     padding: 10px 14px;
     border-radius: 29px;
   }
 }
+
 .ability {
   color: rgb(10, 119, 10);
   margin: 0 10px 10px 0;
@@ -284,10 +329,12 @@ h3 {
   font-size: 1.2rem;
   cursor: pointer;
 }
+
 i {
   font-size: 2rem;
   color: #efefef;
 }
+
 .bold {
   font-weight: bold;
 }

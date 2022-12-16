@@ -1,6 +1,9 @@
 <template>
+  <!-- Div contenant tous les pokemons -->
   <div class="list">
+    <!-- Pour chaque pokemon dans la fonctionpokemonFiltered + dès que je clique ça prend le lien du pokemon-->
     <article v-for="pokemon in pokemonsFiltered" v-bind:key="pokemon.name" v-on:click="showPokemonDetail(pokemon.url)">
+      <!-- J'affiche l'image et le nom du pokemon -->
       <img :src="imageURL + pokemon.name +'.png'" alt="">
       <h3>{{pokemon.name}}</h3>
     </article>
@@ -9,49 +12,50 @@
 
 <script>
 
-// import d'axios pour faire une requete http
 import axios from '../../node_modules/axios'
 import config from '../config/config.json'
-// import _ from "lodash";
 
 export default {
-  // Called right before the component is to be mounted.
+  // appelé juste avant que le composant soit créé
   beforeMount(){
-    // appel de l'api pour récuperer la liste des characters
+    // appel pour récupérer tous les pokemons
     axios.get(config.API_URL)
       .then((e)=>{
-        // sur le retour on stock la data dans caracters
+        // Je stocke tout dans la variable pokemons
         this.pokemons = e.data.results;
-        console.log(this.pokemons);
       })
   } ,   
+  // Les props permettent de transférer les données pokemonUrl et imageURL dans ce composant
   props:['imageURL',"recherche"],
+  // propriété data 
   data: function () {
     return {
-      // datastore
-  
-      pokemons: []
+      pokemons: [] // variable qui récupère tous les pokemons
     };
   },
   methods:{
+    // Cette méthode envoie un signal quand je clique sur un pokemon pour vouloir l'afficher
     showPokemonDetail: function(pokemon){
-      console.log('open');
-      console.log(pokemon);
-      this.$emit("ShowPokemonDetail",pokemon);
+      this.$emit("ShowPokemonDetail",pokemon); // relier à la fonction ShowPokemonDetail + récupère le pokemon en question
     }
   },
+  
   computed: {
-    pokemonsFiltered: function(){     
+    // fonction qui permet de filtrer la liste de pokemon
+    pokemonsFiltered: function(){ 
+      // si ma recherche est vide    
       if (this.recherche === ""){
+        // j'affiche tous les pokemons
         return this.pokemons
       }
+      // sinon
       else{
-        let filteredStories = this.pokemons.filter((pokemon) => {
+        // Je filtre selon ma recherche
+        let filteredList = this.pokemons.filter((pokemon) => {
         return pokemon.name.includes(this.recherche);
        })
-       return filteredStories
+       return filteredList
       }
-
     }     
   }
 }

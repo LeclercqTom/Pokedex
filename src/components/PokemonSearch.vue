@@ -1,5 +1,6 @@
 <template>
   <div class="searchbar">
+    <!-- input correspondant à la barre de recherche  -->
     <input type="text" placeholder="Recherche un pokemon" v-model="recherche">
  </div>
 
@@ -8,14 +9,17 @@
 <script>
  
 export default {
+  // propriété data
   data() {
     return {
-      recherche: "",
+      recherche: "", // variable qui va contenir ce que j'ai saisi dans le input  
     }
   },
+
   watch: {
+    // dès que recherche change 
     recherche: function(newSearch){
-      this.$emit("searchPokemonEmit", newSearch);
+      this.$emit("searchPokemonEmit", newSearch); // j'émets un signal relié à la fonction serachPokemonEmit et qui prends la nouvelle recherche 
     }
   }
 }
